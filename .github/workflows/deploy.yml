@@ -11,13 +11,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy via rsync over SSH
-        uses: burnett01/rsync-deployments@7.0.1
-        with:
-          switches: -avz --delete --exclude='.git/' --exclude='.github/' --exclude='.claude/' --exclude='.gitignore' --exclude='*.md' --exclude='debug.html'
-          path: ./
-          remote_path: ${{ secrets.SITEGROUND_REMOTE_PATH }}
-          remote_host: ${{ secrets.SITEGROUND_HOST }}
-          remote_port: ${{ secrets.SITEGROUND_PORT }}
-          remote_user: ${{ secrets.SITEGROUND_USER }}
-          remote_key: ${{ secrets.SITEGROUND_SSH_KEY }}
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SITEGROUND_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.SITEGROUND_PORT }} ${{ secrets.SITEGROUND_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy via rsync
+        run: |
+          rsync -avz --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.claude/' \
+            --exclude='.gitignore' \
+            --exclude='*.md' \
+            --exclude='debug.html' \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SITEGROUND_PORT }} -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.SITEGROUND_USER }}@${{ secrets.SITEGROUND_HOST }}:${{ secrets.SITEGROUND_REMOTE_PATH }}
