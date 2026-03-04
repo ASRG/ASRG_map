@@ -172,29 +172,31 @@ class NodeRenderer {
     // Author badge (bottom-left, pill-shaped background)
     const authorText = d.authorShort || d.author || '';
     if (authorText) {
-      const authorX = -halfW + CONFIG.nodes.padding;
-      const authorY = halfH - 12;
       const truncatedAuthor = this.truncateAuthor(authorText, dim.width);
+      const badgeH = CONFIG.nodes.authorFontSize + CONFIG.nodes.authorPaddingY * 2;
+      const badgeW = truncatedAuthor.length * 5.2 + CONFIG.nodes.authorPaddingX * 2;
+      const badgeX = -halfW + CONFIG.nodes.padding;
+      const badgeY = halfH - badgeH - 4;
 
       // Badge background rect
-      const textWidth = truncatedAuthor.length * 5.2 + CONFIG.nodes.authorPaddingX * 2;
       group.append('rect')
         .attr('class', 'node-author-bg')
-        .attr('x', authorX - 1)
-        .attr('y', authorY - CONFIG.nodes.authorPaddingY - 4)
-        .attr('width', textWidth)
-        .attr('height', CONFIG.nodes.authorFontSize + CONFIG.nodes.authorPaddingY * 2)
+        .attr('x', badgeX)
+        .attr('y', badgeY)
+        .attr('width', badgeW)
+        .attr('height', badgeH)
         .attr('rx', CONFIG.nodes.authorBorderRadius)
         .attr('ry', CONFIG.nodes.authorBorderRadius)
         .attr('fill', CONFIG.nodes.authorBgColor)
         .style('opacity', 0); // Hidden by default
 
-      // Author text
+      // Author text — centered in badge
       group.append('text')
         .attr('class', 'node-author')
-        .attr('text-anchor', 'start')
-        .attr('x', authorX + CONFIG.nodes.authorPaddingX - 1)
-        .attr('y', authorY)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('x', badgeX + badgeW / 2)
+        .attr('y', badgeY + badgeH / 2)
         .text(truncatedAuthor)
         .style('font-size', CONFIG.nodes.authorFontSize + 'px')
         .style('fill', CONFIG.nodes.authorColor)
