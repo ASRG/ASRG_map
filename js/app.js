@@ -47,6 +47,9 @@ class App {
       const stats = this.dataProcessor.getStatistics(graphData.nodes, graphData.links);
       console.log('Graph statistics:', stats);
 
+      // Show app before initializing visualization so container has dimensions
+      this.showApp();
+
       // Initialize visualization
       console.log('Initializing visualization...');
       this.forceGraph = new ForceGraph('#graph-container');
@@ -68,9 +71,6 @@ class App {
 
       // Update stats display
       this.updateStatsDisplay(stats);
-
-      // Hide loading, show app
-      this.showApp();
 
       console.log('Application initialized successfully!');
 
