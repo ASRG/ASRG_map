@@ -70,18 +70,25 @@
   stroke-width: 2 !important;
 }
 
-.node-accent {
-  transition: fill 0.3s;
-}
-
 .node-title {
   font-family: var(--font-family);
   user-select: none;
 }
 
-.node-type {
+.node-icon-bg {
+  transition: fill 0.3s;
+}
+
+.node-icon-label {
   font-family: var(--font-family);
   user-select: none;
+  pointer-events: none;
+}
+
+.node-author {
+  font-family: var(--font-family);
+  user-select: none;
+  pointer-events: none;
   transition: opacity 0.2s;
 }
 

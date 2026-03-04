@@ -95,13 +95,12 @@ const CONFIG = {
     velocityDecay: 0.4
   },
 
-  // Node rendering (card-style rounded rectangles)
+  // Node rendering (card-style with circle icon)
   nodes: {
     baseWidth: 130,
-    baseHeight: 46,
+    baseHeight: 56,
     cornerRadius: 12,
     padding: 10,
-    accentWidth: 4,       // colored left accent bar width
     strokeWidth: 1,
     strokeColor: '#e8eff5',
     bgColor: '#ffffff',
@@ -110,14 +109,30 @@ const CONFIG = {
     minScale: 0.85,
     maxScale: 1.15,
     // Text sizing
-    titleFontSize: 12,
-    typeFontSize: 9,
+    titleFontSize: 11,
     titleColor: '#191a1c',
-    typeColor: '#9ca3af',
+    // Author text
+    authorFontSize: 8,
+    authorColor: '#6b7280',
+    // Circle icon (top-right)
+    iconRadius: 10,
+    iconOffsetX: 14,
+    iconOffsetY: 14,
     // Shadow
     shadowColor: 'rgba(0,0,0,0.06)',
     shadowBlur: 8,
     shadowOffsetY: 3
+  },
+
+  // Node type icon letters
+  nodeIcons: {
+    'Norm / Standard': 'S',
+    'Regulation': 'R',
+    'Working Group': 'W',
+    'Best Practices': 'B',
+    'Guidelines': 'G',
+    'Framework': 'F',
+    'Unknown': '?'
   },
 
   // Link rendering
