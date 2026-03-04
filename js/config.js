@@ -97,8 +97,8 @@ const CONFIG = {
 
   // Node rendering (card-style with circle icon)
   nodes: {
-    baseWidth: 130,
-    baseHeight: 56,
+    baseWidth: 140,
+    baseHeight: 60,
     cornerRadius: 12,
     padding: 10,
     strokeWidth: 1,
@@ -109,30 +109,61 @@ const CONFIG = {
     minScale: 0.85,
     maxScale: 1.15,
     // Text sizing
-    titleFontSize: 11,
+    titleFontSize: 10,
     titleColor: '#191a1c',
-    // Author text
+    // Author badge
     authorFontSize: 8,
     authorColor: '#6b7280',
-    // Circle icon (top-right)
-    iconRadius: 10,
-    iconOffsetX: 14,
-    iconOffsetY: 14,
+    authorBgColor: '#f3f4f6',
+    authorBorderRadius: 4,
+    authorPaddingX: 6,
+    authorPaddingY: 3,
+    // Circle icon (top-left)
+    iconRadius: 12,
+    iconOffsetX: 18,
+    iconOffsetY: 18,
     // Shadow
     shadowColor: 'rgba(0,0,0,0.06)',
     shadowBlur: 8,
     shadowOffsetY: 3
   },
 
-  // Node type icon letters
-  nodeIcons: {
-    'Norm / Standard': 'S',
-    'Regulation': 'R',
-    'Working Group': 'W',
-    'Best Practices': 'B',
-    'Guidelines': 'G',
-    'Framework': 'F',
-    'Unknown': '?'
+  // SVG icon paths per node type (drawn in ~8x8 unit space centered at 0,0)
+  nodeIconPaths: {
+    'Norm / Standard': {
+      // Document page with folded corner
+      d: 'M-2.5,-3.5 V3.5 H2.5 V-0.5 L0,-3.5 Z M0,-3.5 V-0.5 H2.5',
+      fill: 'none'
+    },
+    'Regulation': {
+      // Shield
+      d: 'M0,-4 L-3.5,-1.5 V1.5 L0,4 L3.5,1.5 V-1.5 Z',
+      fill: 'none'
+    },
+    'Working Group': {
+      // People silhouette (two heads + body arc)
+      type: 'people'
+    },
+    'Best Practices': {
+      // Checkmark
+      d: 'M-3,0.5 L-1,3 L3.5,-2.5',
+      fill: 'none'
+    },
+    'Guidelines': {
+      // Three horizontal lines (list)
+      d: 'M-3,-2.5 H3 M-3,0 H3 M-3,2.5 H1.5',
+      fill: 'none'
+    },
+    'Framework': {
+      // 2x2 grid
+      d: 'M-3.5,-3.5 H-0.5 V-0.5 H-3.5 Z M0.5,-3.5 H3.5 V-0.5 H0.5 Z M-3.5,0.5 H-0.5 V3.5 H-3.5 Z M0.5,0.5 H3.5 V3.5 H0.5 Z',
+      fill: 'none'
+    },
+    'Unknown': {
+      // Question mark
+      d: 'M-1.5,-3.5 Q-3.5,-3.5 -3.5,-1.5 Q-3.5,0 -1,0 V1.5 M-1,3 V3.5',
+      fill: 'none'
+    }
   },
 
   // Link rendering
