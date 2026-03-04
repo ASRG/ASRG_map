@@ -1,15 +1,17 @@
 /**
- * Node renderer for the force graph — rounded rectangles with embedded text
+ * Node renderer for the force graph — card-style rounded rectangles
+ * Inspired by the ReportCard design: white bg, colored accent, subtle shadow
  */
 
 class NodeRenderer {
   constructor(graphBuilder) {
     this.graphBuilder = graphBuilder;
     this.colorScheme = 'type'; // default color scheme
+    this.shadowFilterAdded = false;
   }
 
   /**
-   * Get node color based on current color scheme
+   * Get node accent color based on current color scheme
    */
   getNodeColor(node) {
     switch (this.colorScheme) {
@@ -32,9 +34,39 @@ class NodeRenderer {
   }
 
   /**
-   * Render nodes as rounded rectangles with title and type text
+   * Add SVG shadow filter to defs (called once)
+   */
+  addShadowFilter(container) {
+    if (this.shadowFilterAdded) return;
+
+    let defs = container.select('defs');
+    if (defs.empty()) {
+      defs = container.append('defs');
+    }
+
+    const filter = defs.append('filter')
+      .attr('id', 'card-shadow')
+      .attr('x', '-20%')
+      .attr('y', '-20%')
+      .attr('width', '140%')
+      .attr('height', '140%');
+
+    filter.append('feDropShadow')
+      .attr('dx', 0)
+      .attr('dy', CONFIG.nodes.shadowOffsetY)
+      .attr('stdDeviation', CONFIG.nodes.shadowBlur)
+      .attr('flood-color', CONFIG.nodes.shadowColor);
+
+    this.shadowFilterAdded = true;
+  }
+
+  /**
+   * Render nodes as card-style rounded rectangles
    */
   renderNodes(container, nodes) {
+    // Add shadow filter
+    this.addShadowFilter(container);
+
     const nodeGroup = container.append('g')
       .attr('class', 'nodes');
 
@@ -44,8 +76,9 @@ class NodeRenderer {
       .attr('class', 'node')
       .attr('data-id', d => d.id);
 
-    // Add rounded rectangles (centered on node position)
+    // Card background (white with shadow)
     node.append('rect')
+      .attr('class', 'node-card')
       .attr('x', d => {
         const dim = this.graphBuilder.getNodeDimensions(d.degree);
         return -dim.width / 2;
@@ -58,30 +91,53 @@ class NodeRenderer {
       .attr('height', d => this.graphBuilder.getNodeDimensions(d.degree).height)
       .attr('rx', CONFIG.nodes.cornerRadius)
       .attr('ry', CONFIG.nodes.cornerRadius)
-      .attr('fill', d => this.getNodeColor(d))
-      .attr('stroke', '#fff')
-      .attr('stroke-width', CONFIG.nodes.strokeWidth);
+      .attr('fill', CONFIG.nodes.bgColor)
+      .attr('stroke', CONFIG.nodes.strokeColor)
+      .attr('stroke-width', CONFIG.nodes.strokeWidth)
+      .style('filter', 'url(#card-shadow)');
 
-    // Add title text (always visible, white, bold)
+    // Colored left accent bar
+    node.append('rect')
+      .attr('class', 'node-accent')
+      .attr('x', d => {
+        const dim = this.graphBuilder.getNodeDimensions(d.degree);
+        return -dim.width / 2;
+      })
+      .attr('y', d => {
+        const dim = this.graphBuilder.getNodeDimensions(d.degree);
+        return -dim.height / 2 + 6;
+      })
+      .attr('width', CONFIG.nodes.accentWidth)
+      .attr('height', d => {
+        const dim = this.graphBuilder.getNodeDimensions(d.degree);
+        return dim.height - 12;
+      })
+      .attr('rx', 2)
+      .attr('ry', 2)
+      .attr('fill', d => this.getNodeColor(d));
+
+    // Title text (dark, bold)
     node.append('text')
       .attr('class', 'node-title')
       .attr('text-anchor', 'middle')
+      .attr('x', CONFIG.nodes.accentWidth / 2)
       .attr('dy', '-0.15em')
       .text(d => this.truncateText(d.shortTitle, d.degree))
       .style('font-size', CONFIG.nodes.titleFontSize + 'px')
       .style('font-weight', '600')
-      .style('fill', '#fff')
+      .style('fill', CONFIG.nodes.titleColor)
       .style('pointer-events', 'none')
       .style('user-select', 'none');
 
-    // Add type text (smaller, semi-transparent, shown on zoom)
+    // Type text (gray, smaller, shown on zoom)
     node.append('text')
       .attr('class', 'node-type')
       .attr('text-anchor', 'middle')
-      .attr('dy', '1.1em')
+      .attr('x', CONFIG.nodes.accentWidth / 2)
+      .attr('dy', '1.15em')
       .text(d => d.type)
       .style('font-size', CONFIG.nodes.typeFontSize + 'px')
-      .style('fill', 'rgba(255,255,255,0.7)')
+      .style('fill', CONFIG.nodes.typeColor)
       .style('pointer-events', 'none')
       .style('user-select', 'none')
       .style('opacity', 0); // Hidden by default, shown on zoom
@@ -94,7 +150,7 @@ class NodeRenderer {
    */
   truncateText(text, degree) {
     const dim = this.graphBuilder.getNodeDimensions(degree);
-    const maxChars = Math.floor((dim.width - CONFIG.nodes.padding * 2) / 6.5);
+    const maxChars = Math.floor((dim.width - CONFIG.nodes.padding * 2 - CONFIG.nodes.accentWidth) / 6.5);
     if (text.length <= maxChars) return text;
     return text.substring(0, maxChars - 1) + '\u2026';
   }
@@ -107,10 +163,10 @@ class NodeRenderer {
   }
 
   /**
-   * Update node colors (when color scheme changes)
+   * Update node colors (when color scheme changes) — only accent bar changes
    */
   updateColors(nodeSelection) {
-    nodeSelection.select('rect')
+    nodeSelection.select('.node-accent')
       .transition()
       .duration(CONFIG.animation.duration)
       .attr('fill', d => this.getNodeColor(d));
@@ -124,11 +180,11 @@ class NodeRenderer {
       const node = d3.select(this);
       const isSelected = d.id === nodeId;
 
-      node.select('rect')
+      node.select('.node-card')
         .transition()
         .duration(CONFIG.animation.fadeDuration)
-        .attr('stroke', isSelected ? CONFIG.colors.ui.selected : '#fff')
-        .attr('stroke-width', isSelected ? 4 : CONFIG.nodes.strokeWidth);
+        .attr('stroke', isSelected ? CONFIG.colors.ui.selected : CONFIG.nodes.strokeColor)
+        .attr('stroke-width', isSelected ? 3 : CONFIG.nodes.strokeWidth);
     });
   }
 
@@ -154,11 +210,11 @@ class NodeRenderer {
       const node = d3.select(this);
       const isConnected = connectedIds.has(d.id);
 
-      node.select('rect')
+      node.select('.node-card')
         .transition()
         .duration(CONFIG.animation.fadeDuration)
-        .attr('stroke', isConnected ? CONFIG.colors.ui.highlighted : '#fff')
-        .attr('stroke-width', isConnected ? 3 : CONFIG.nodes.strokeWidth);
+        .attr('stroke', isConnected ? CONFIG.colors.ui.highlighted : CONFIG.nodes.strokeColor)
+        .attr('stroke-width', isConnected ? 2.5 : CONFIG.nodes.strokeWidth);
     });
   }
 

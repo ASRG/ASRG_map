@@ -78,8 +78,8 @@ const CONFIG = {
 
     // UI colors
     ui: {
-      selected: '#FFD700',
-      highlighted: '#FFA500',
+      selected: '#2563eb',
+      highlighted: '#93c5fd',
       faded: 0.1,
       normal: 1.0
     }
@@ -95,20 +95,29 @@ const CONFIG = {
     velocityDecay: 0.4
   },
 
-  // Node rendering (rounded rectangles)
+  // Node rendering (card-style rounded rectangles)
   nodes: {
-    baseWidth: 120,
-    baseHeight: 40,
-    cornerRadius: 6,
-    padding: 8,
-    strokeWidth: 2,
+    baseWidth: 130,
+    baseHeight: 46,
+    cornerRadius: 12,
+    padding: 10,
+    accentWidth: 4,       // colored left accent bar width
+    strokeWidth: 1,
+    strokeColor: '#e8eff5',
+    bgColor: '#ffffff',
     labelThreshold: 1.2,
     // Scaling by degree
     minScale: 0.85,
     maxScale: 1.15,
     // Text sizing
-    titleFontSize: 11,
-    typeFontSize: 9
+    titleFontSize: 12,
+    typeFontSize: 9,
+    titleColor: '#191a1c',
+    typeColor: '#9ca3af',
+    // Shadow
+    shadowColor: 'rgba(0,0,0,0.06)',
+    shadowBlur: 8,
+    shadowOffsetY: 3
   },
 
   // Link rendering

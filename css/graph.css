@@ -61,13 +61,17 @@
   transition: opacity 0.2s;
 }
 
-.node rect {
-  transition: stroke 0.2s, stroke-width 0.2s, filter 0.2s;
+.node-card {
+  transition: stroke 0.2s, stroke-width 0.2s;
 }
 
-.node:hover rect {
-  stroke-width: 3 !important;
-  filter: brightness(1.1);
+.node:hover .node-card {
+  stroke: #d0d5dd !important;
+  stroke-width: 2 !important;
+}
+
+.node-accent {
+  transition: fill 0.3s;
 }
 
 .node-title {
