@@ -100,7 +100,8 @@ class URLState {
    */
   async shareURL() {
     const stateStr = this.encodeState();
-    const url = `${window.location.origin}${window.location.pathname}${stateStr ? '#' + stateStr : ''}`;
+    const baseUrl = 'https://asrg.io/knowledge-map';
+    const url = `${baseUrl}${stateStr ? '#' + stateStr : ''}`;
 
     // Copy to clipboard
     const success = await copyToClipboard(url);
