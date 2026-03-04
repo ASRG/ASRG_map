@@ -14,17 +14,10 @@ jobs:
       - name: Deploy via rsync over SSH
         uses: burnett01/rsync-deployments@7.0.1
         with:
-          switches: -avz --delete
+          switches: -avz --delete --exclude='.git/' --exclude='.github/' --exclude='.claude/' --exclude='.gitignore' --exclude='*.md' --exclude='debug.html'
           path: ./
           remote_path: ${{ secrets.SITEGROUND_REMOTE_PATH }}
           remote_host: ${{ secrets.SITEGROUND_HOST }}
           remote_port: ${{ secrets.SITEGROUND_PORT }}
           remote_user: ${{ secrets.SITEGROUND_USER }}
           remote_key: ${{ secrets.SITEGROUND_SSH_KEY }}
-          exclude: |
-            .git/
-            .github/
-            .claude/
-            .gitignore
-            *.md
-            debug.html
