@@ -16,13 +16,10 @@ jobs:
           rm -rf .git .github .claude .gitignore debug.html
           find . -name '*.md' -delete
 
-      - name: Deploy via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.SITEGROUND_HOST }}
-          port: ${{ secrets.SITEGROUND_PORT }}
-          username: ${{ secrets.SITEGROUND_USER }}
-          password: ${{ secrets.SITEGROUND_PASSWORD }}
-          protocol: sftp
-          server-dir: ${{ secrets.SITEGROUND_REMOTE_PATH }}
-          dangerous-clean-slate: true
+      - name: Deploy via SFTP (lftp mirror)
+        run: |
+          sudo apt-get update && sudo apt-get install -y lftp
+          lftp -u "${{ secrets.SITEGROUND_USER }},${{ secrets.SITEGROUND_PASSWORD }}" \
+               -p ${{ secrets.SITEGROUND_PORT }} \
+               -e "set sftp:auto-confirm yes; set net:max-retries 3; mirror --reverse --delete --verbose . ${{ secrets.SITEGROUND_REMOTE_PATH }}; quit" \
+               sftp://${{ secrets.SITEGROUND_HOST }}
