@@ -11,21 +11,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup SSH key
+      - name: Remove non-deploy files
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SITEGROUND_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.SITEGROUND_PORT }} ${{ secrets.SITEGROUND_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          rm -rf .git .github .claude .gitignore debug.html
+          find . -name '*.md' -delete
 
-      - name: Deploy via rsync
-        run: |
-          rsync -avz --delete \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='.claude/' \
-            --exclude='.gitignore' \
-            --exclude='*.md' \
-            --exclude='debug.html' \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SITEGROUND_PORT }} -o StrictHostKeyChecking=no" \
-            ./ ${{ secrets.SITEGROUND_USER }}@${{ secrets.SITEGROUND_HOST }}:${{ secrets.SITEGROUND_REMOTE_PATH }}
+      - name: Deploy via SFTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SITEGROUND_HOST }}
+          port: ${{ secrets.SITEGROUND_PORT }}
+          username: ${{ secrets.SITEGROUND_USER }}
+          password: ${{ secrets.SITEGROUND_PASSWORD }}
+          protocol: sftp
+          server-dir: ${{ secrets.SITEGROUND_REMOTE_PATH }}
+          dangerous-clean-slate: true
