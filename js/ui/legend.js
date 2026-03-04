@@ -39,9 +39,9 @@ class Legend {
       </div>
 
       <div class="legend-group">
-        <h4>Node Size</h4>
+        <h4>Interaction</h4>
         <p style="font-size: 11px; opacity: 0.8; margin: 8px 0;">
-          Node size indicates the number of connections
+          Click a node to open its reference document
         </p>
       </div>
     `;

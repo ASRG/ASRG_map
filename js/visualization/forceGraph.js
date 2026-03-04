@@ -93,10 +93,10 @@ class ForceGraph {
         .distance(d => CONFIG.simulation.linkDistance / d.strength))
       .force('charge', d3.forceManyBody()
         .strength(CONFIG.simulation.chargeStrength))
-      .force('center', d3.forceCenter(width / 2, height / 2)
-        .strength(CONFIG.simulation.centerStrength))
+      .force('x', d3.forceX(width / 2).strength(CONFIG.simulation.centerStrength))
+      .force('y', d3.forceY(height / 2).strength(CONFIG.simulation.centerStrength))
       .force('collision', d3.forceCollide()
-        .radius(d => this.graphBuilder.getNodeRadius(d.degree) + 5))
+        .radius(d => this.graphBuilder.getCollisionRadius(d.degree)))
       .alphaDecay(CONFIG.simulation.alphaDecay)
       .velocityDecay(CONFIG.simulation.velocityDecay);
 
@@ -245,6 +245,33 @@ class ForceGraph {
         this.zoom.transform,
         d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
       );
+  }
+
+  /**
+   * Add a new node to the running simulation
+   */
+  addNode(newNode) {
+    // Position near viewport center in graph coordinates
+    const containerRect = this.container.node().getBoundingClientRect();
+    const centerScreen = [containerRect.width / 2, containerRect.height / 2];
+    const graphCoords = this.currentTransform.invert(centerScreen);
+    newNode.x = graphCoords[0] + (Math.random() - 0.5) * 100;
+    newNode.y = graphCoords[1] + (Math.random() - 0.5) * 100;
+
+    // Add the SVG elements for this node
+    const newNodeSelection = this.nodeRenderer.addSingleNode(this.graphContainer, newNode);
+
+    // Re-select ALL node groups to update the selection (needed for tick handler)
+    this.nodeSelection = this.graphContainer.select('g.nodes').selectAll('g.node');
+
+    // Setup interactions on the new node
+    this.interactions.setupDrag(newNodeSelection);
+    this.interactions.setupClick(newNodeSelection);
+    this.interactions.setupHover(newNodeSelection);
+
+    // Update the simulation with the new nodes array and restart
+    this.simulation.nodes(this.nodes);
+    this.simulation.alpha(0.3).restart();
   }
 
   /**

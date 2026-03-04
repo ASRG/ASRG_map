@@ -1,0 +1,30 @@
+name: Deploy to SiteGround
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy via rsync over SSH
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -avz --delete
+          path: ./
+          remote_path: ${{ secrets.SITEGROUND_REMOTE_PATH }}
+          remote_host: ${{ secrets.SITEGROUND_HOST }}
+          remote_port: ${{ secrets.SITEGROUND_PORT }}
+          remote_user: ${{ secrets.SITEGROUND_USER }}
+          remote_key: ${{ secrets.SITEGROUND_SSH_KEY }}
+          exclude: |
+            .git/
+            .github/
+            .claude/
+            .gitignore
+            *.md
+            debug.html

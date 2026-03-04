@@ -17,7 +17,7 @@ class LinkRenderer {
       defs.append('marker')
         .attr('id', `arrow-${type}`)
         .attr('viewBox', '0 -5 10 10')
-        .attr('refX', 20)
+        .attr('refX', 50)
         .attr('refY', 0)
         .attr('markerWidth', CONFIG.links.arrowSize)
         .attr('markerHeight', CONFIG.links.arrowSize)

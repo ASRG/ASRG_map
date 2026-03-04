@@ -114,6 +114,14 @@
     right: 0;
   }
 
+  .fab-add {
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+  }
+
   /* Graph stats - simpler on mobile */
   .graph-stats {
     position: absolute;

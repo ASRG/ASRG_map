@@ -61,15 +61,25 @@
   transition: opacity 0.2s;
 }
 
-.node circle {
+.node-card {
   transition: stroke 0.2s, stroke-width 0.2s;
 }
 
-.node:hover circle {
-  stroke-width: 3 !important;
+.node:hover .node-card {
+  stroke: #d0d5dd !important;
+  stroke-width: 2 !important;
 }
 
-.node-label {
+.node-accent {
+  transition: fill 0.3s;
+}
+
+.node-title {
+  font-family: var(--font-family);
+  user-select: none;
+}
+
+.node-type {
   font-family: var(--font-family);
   user-select: none;
   transition: opacity 0.2s;

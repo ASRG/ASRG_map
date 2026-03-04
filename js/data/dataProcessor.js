@@ -35,9 +35,7 @@ class DataProcessor {
         category,
 
         // Graph properties (will be set by graph builder)
-        degree: 0,
-        x: 0,
-        y: 0
+        degree: 0
       };
     });
 

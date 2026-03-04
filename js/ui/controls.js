@@ -7,7 +7,6 @@ class Controls {
     // Buttons
     this.playPauseBtn = document.getElementById('btn-play-pause');
     this.resetBtn = document.getElementById('btn-reset');
-    this.exportBtn = document.getElementById('btn-export');
     this.shareBtn = document.getElementById('btn-share');
     this.colorSchemeSelect = document.getElementById('color-scheme');
 
@@ -29,11 +28,6 @@ class Controls {
     // Reset button
     this.resetBtn.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(EVENTS.VIEW_RESET));
-    });
-
-    // Export button
-    this.exportBtn.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent(EVENTS.EXPORT_PNG));
     });
 
     // Share button

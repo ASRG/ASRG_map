@@ -7,6 +7,7 @@ class Interactions {
     this.simulation = simulation;
     this.nodeRenderer = nodeRenderer;
     this.selectedNode = null;
+    this.isDragging = false;
   }
 
   /**
@@ -22,12 +23,14 @@ class Interactions {
   }
 
   dragStarted(event, d) {
+    this.isDragging = false;
     if (!event.active) this.simulation.alphaTarget(0.3).restart();
     d.fx = d.x;
     d.fy = d.y;
   }
 
   dragging(event, d) {
+    this.isDragging = true;
     d.fx = event.x;
     d.fy = event.y;
   }
@@ -39,11 +42,24 @@ class Interactions {
   }
 
   /**
-   * Setup click behavior
+   * Setup click behavior — opens node URL in new tab
    */
   setupClick(nodeSelection) {
     nodeSelection.on('click', (event, d) => {
       event.stopPropagation();
+
+      // Don't fire click after a drag
+      if (this.isDragging) {
+        this.isDragging = false;
+        return;
+      }
+
+      // Open URL in new tab if available
+      if (d.link) {
+        window.open(d.link, '_blank');
+      }
+
+      // Also select the node (for detail panel via search/sidebar)
       this.selectNode(d);
     });
   }
@@ -54,9 +70,7 @@ class Interactions {
   setupHover(nodeSelection) {
     nodeSelection
       .on('mouseenter', (event, d) => {
-        if (this.selectedNode !== d.id) {
-          this.showTooltip(event, d);
-        }
+        this.showTooltip(event, d);
       })
       .on('mouseleave', () => {
         this.hideTooltip();
@@ -108,10 +122,15 @@ class Interactions {
       document.body.appendChild(tooltip);
     }
 
+    const linkHint = node.link
+      ? '<br><span style="opacity: 0.6; font-size: 11px;">Click to open link</span>'
+      : '';
+
     tooltip.innerHTML = `
       <strong>${escapeHTML(node.shortTitle)}</strong><br>
       <span style="opacity: 0.8;">${escapeHTML(node.type)}</span><br>
       <span style="opacity: 0.7;">Connections: ${node.degree}</span>
+      ${linkHint}
     `;
 
     tooltip.style.display = 'block';

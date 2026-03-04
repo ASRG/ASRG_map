@@ -10,6 +10,7 @@ class App {
     this.forceGraph = null;
     this.searchFilter = null;
     this.detailPanel = null;
+    this.addEntryPanel = null;
     this.legend = null;
     this.controls = null;
     this.imageExport = null;
@@ -47,6 +48,9 @@ class App {
       const stats = this.dataProcessor.getStatistics(graphData.nodes, graphData.links);
       console.log('Graph statistics:', stats);
 
+      // Show app before initializing visualization so container has dimensions
+      this.showApp();
+
       // Initialize visualization
       console.log('Initializing visualization...');
       this.forceGraph = new ForceGraph('#graph-container');
@@ -56,6 +60,7 @@ class App {
       console.log('Initializing UI...');
       this.searchFilter = new SearchFilter(graphData.nodes);
       this.detailPanel = new DetailPanel(graphData);
+      this.addEntryPanel = new AddEntryPanel(graphData, this.forceGraph);
       this.legend = new Legend();
       this.controls = new Controls();
 
@@ -68,9 +73,6 @@ class App {
 
       // Update stats display
       this.updateStatsDisplay(stats);
-
-      // Hide loading, show app
-      this.showApp();
 
       console.log('Application initialized successfully!');
 

@@ -101,17 +101,42 @@ class GraphBuilder {
   }
 
   /**
-   * Calculate node radius based on degree
+   * Get scale factor for a node based on its degree
    */
-  getNodeRadius(degree) {
-    if (degree === 0) return CONFIG.nodes.defaultRadius;
+  getNodeScale(degree) {
+    if (degree <= 1) return CONFIG.nodes.minScale;
 
-    // Scale radius based on degree (logarithmic scale)
     const scale = d3.scaleLog()
       .domain([1, 20])
-      .range([CONFIG.nodes.minRadius, CONFIG.nodes.maxRadius])
+      .range([CONFIG.nodes.minScale, CONFIG.nodes.maxScale])
       .clamp(true);
 
-    return scale(degree + 1);
+    return scale(degree);
+  }
+
+  /**
+   * Get node dimensions (width, height) based on degree
+   */
+  getNodeDimensions(degree) {
+    const s = this.getNodeScale(degree);
+    return {
+      width: CONFIG.nodes.baseWidth * s,
+      height: CONFIG.nodes.baseHeight * s
+    };
+  }
+
+  /**
+   * Get collision radius for rectangle nodes (half-diagonal)
+   */
+  getCollisionRadius(degree) {
+    const { width, height } = this.getNodeDimensions(degree);
+    return Math.sqrt(width * width + height * height) / 2 + 4;
+  }
+
+  /**
+   * Calculate node radius based on degree (legacy, used for fallback)
+   */
+  getNodeRadius(degree) {
+    return this.getCollisionRadius(degree);
   }
 }
