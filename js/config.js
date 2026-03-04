@@ -109,7 +109,7 @@ const CONFIG = {
     minScale: 0.85,
     maxScale: 1.15,
     // Text sizing
-    titleFontSize: 10,
+    titleFontSize: 8,
     titleColor: '#191a1c',
     // Author badge
     authorFontSize: 8,
