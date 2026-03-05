@@ -169,6 +169,33 @@ class NodeRenderer {
       .style('pointer-events', 'none')
       .style('user-select', 'none');
 
+    // Description text (below title/icon area, multiline)
+    const descText = d.description || '';
+    if (descText) {
+      const descX = -halfW + CONFIG.nodes.padding;
+      const descStartY = -halfH + CONFIG.nodes.iconOffsetY + CONFIG.nodes.iconRadius + 8;
+      const descMaxWidth = dim.width - CONFIG.nodes.padding * 2;
+      const lines = this.wrapText(descText, descMaxWidth, CONFIG.nodes.descFontSize);
+      const maxLines = CONFIG.nodes.descMaxLines;
+
+      lines.slice(0, maxLines).forEach((line, i) => {
+        let text = line;
+        if (i === maxLines - 1 && lines.length > maxLines) {
+          text = text.substring(0, text.length - 1) + '\u2026';
+        }
+        group.append('text')
+          .attr('class', 'node-desc')
+          .attr('text-anchor', 'start')
+          .attr('x', descX)
+          .attr('y', descStartY + i * CONFIG.nodes.descLineHeight)
+          .text(text)
+          .style('font-size', CONFIG.nodes.descFontSize + 'px')
+          .style('fill', CONFIG.nodes.descColor)
+          .style('pointer-events', 'none')
+          .style('user-select', 'none');
+      });
+    }
+
     // Author badge (bottom-left, pill-shaped background)
     const authorText = d.authorShort || d.author || '';
     if (authorText) {
@@ -252,6 +279,29 @@ class NodeRenderer {
     const maxChars = Math.floor(availableWidth / 5.8);
     if (text.length <= maxChars) return text;
     return text.substring(0, maxChars - 1) + '\u2026';
+  }
+
+  /**
+   * Wrap text into lines that fit within a pixel width
+   */
+  wrapText(text, maxWidth, fontSize) {
+    const charWidth = fontSize * 0.58;
+    const maxChars = Math.floor(maxWidth / charWidth);
+    const words = text.split(/\s+/);
+    const lines = [];
+    let currentLine = '';
+
+    words.forEach(word => {
+      const testLine = currentLine ? currentLine + ' ' + word : word;
+      if (testLine.length > maxChars && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+    if (currentLine) lines.push(currentLine);
+    return lines;
   }
 
   /**

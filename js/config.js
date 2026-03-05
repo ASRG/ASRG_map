@@ -87,10 +87,10 @@ const CONFIG = {
 
   // Force simulation parameters
   simulation: {
-    chargeStrength: -400,
-    linkDistance: 180,
+    chargeStrength: -500,
+    linkDistance: 200,
     collisionRadius: 35,
-    centerStrength: 0.12,
+    centerStrength: 0.15,
     alphaDecay: 0.02,
     velocityDecay: 0.4
   },
@@ -98,7 +98,7 @@ const CONFIG = {
   // Node rendering (card-style with circle icon)
   nodes: {
     baseWidth: 140,
-    baseHeight: 60,
+    baseHeight: 120,
     cornerRadius: 12,
     padding: 10,
     strokeWidth: 1,
@@ -111,6 +111,11 @@ const CONFIG = {
     // Text sizing
     titleFontSize: 8,
     titleColor: '#191a1c',
+    // Description text
+    descFontSize: 7,
+    descColor: '#4b5563',
+    descLineHeight: 10,
+    descMaxLines: 4,
     // Author badge
     authorFontSize: 8,
     authorColor: '#6b7280',

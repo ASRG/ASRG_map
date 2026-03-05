@@ -83,6 +83,12 @@
   pointer-events: none;
 }
 
+.node-desc {
+  font-family: var(--font-family);
+  user-select: none;
+  pointer-events: none;
+}
+
 .node-author-bg {
   transition: opacity 0.2s;
 }
