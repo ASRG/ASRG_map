@@ -87,21 +87,20 @@ const CONFIG = {
 
   // Force simulation parameters
   simulation: {
-    chargeStrength: -400,
-    linkDistance: 180,
+    chargeStrength: -500,
+    linkDistance: 200,
     collisionRadius: 35,
-    centerStrength: 0.12,
+    centerStrength: 0.15,
     alphaDecay: 0.02,
     velocityDecay: 0.4
   },
 
-  // Node rendering (card-style rounded rectangles)
+  // Node rendering (card-style with circle icon)
   nodes: {
-    baseWidth: 130,
-    baseHeight: 46,
+    baseWidth: 140,
+    baseHeight: 120,
     cornerRadius: 12,
     padding: 10,
-    accentWidth: 4,       // colored left accent bar width
     strokeWidth: 1,
     strokeColor: '#e8eff5',
     bgColor: '#ffffff',
@@ -110,14 +109,66 @@ const CONFIG = {
     minScale: 0.85,
     maxScale: 1.15,
     // Text sizing
-    titleFontSize: 12,
-    typeFontSize: 9,
+    titleFontSize: 8,
     titleColor: '#191a1c',
-    typeColor: '#9ca3af',
+    // Description text
+    descFontSize: 7,
+    descColor: '#4b5563',
+    descLineHeight: 10,
+    descMaxLines: 4,
+    // Author badge
+    authorFontSize: 8,
+    authorColor: '#6b7280',
+    authorBgColor: '#f3f4f6',
+    authorBorderRadius: 4,
+    authorPaddingX: 6,
+    authorPaddingY: 3,
+    // Circle icon (top-left)
+    iconRadius: 12,
+    iconOffsetX: 18,
+    iconOffsetY: 18,
     // Shadow
     shadowColor: 'rgba(0,0,0,0.06)',
     shadowBlur: 8,
     shadowOffsetY: 3
+  },
+
+  // SVG icon paths per node type (drawn in ~8x8 unit space centered at 0,0)
+  nodeIconPaths: {
+    'Norm / Standard': {
+      // Document page with folded corner
+      d: 'M-2.5,-3.5 V3.5 H2.5 V-0.5 L0,-3.5 Z M0,-3.5 V-0.5 H2.5',
+      fill: 'none'
+    },
+    'Regulation': {
+      // Shield
+      d: 'M0,-4 L-3.5,-1.5 V1.5 L0,4 L3.5,1.5 V-1.5 Z',
+      fill: 'none'
+    },
+    'Working Group': {
+      // People silhouette (two heads + body arc)
+      type: 'people'
+    },
+    'Best Practices': {
+      // Checkmark
+      d: 'M-3,0.5 L-1,3 L3.5,-2.5',
+      fill: 'none'
+    },
+    'Guidelines': {
+      // Three horizontal lines (list)
+      d: 'M-3,-2.5 H3 M-3,0 H3 M-3,2.5 H1.5',
+      fill: 'none'
+    },
+    'Framework': {
+      // 2x2 grid
+      d: 'M-3.5,-3.5 H-0.5 V-0.5 H-3.5 Z M0.5,-3.5 H3.5 V-0.5 H0.5 Z M-3.5,0.5 H-0.5 V3.5 H-3.5 Z M0.5,0.5 H3.5 V3.5 H0.5 Z',
+      fill: 'none'
+    },
+    'Unknown': {
+      // Question mark
+      d: 'M-1.5,-3.5 Q-3.5,-3.5 -3.5,-1.5 Q-3.5,0 -1,0 V1.5 M-1,3 V3.5',
+      fill: 'none'
+    }
   },
 
   // Link rendering

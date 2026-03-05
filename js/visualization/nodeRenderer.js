@@ -1,6 +1,7 @@
 /**
- * Node renderer for the force graph — card-style rounded rectangles
- * Inspired by the ReportCard design: white bg, colored accent, subtle shadow
+ * Node renderer for the force graph — card-style with circle icon
+ * Layout: colored circle icon (top-left) with SVG icon, title (right of icon),
+ * author badge (bottom-left). Matches AutoVulnDB reference card design.
  */
 
 class NodeRenderer {
@@ -61,107 +62,71 @@ class NodeRenderer {
   }
 
   /**
-   * Render nodes as card-style rounded rectangles
+   * Draw the SVG icon shape inside the circle
    */
-  renderNodes(container, nodes) {
-    // Add shadow filter
-    this.addShadowFilter(container);
+  _drawIcon(group, type, cx, cy) {
+    const iconDef = CONFIG.nodeIconPaths[type] || CONFIG.nodeIconPaths['Unknown'];
+    const iconGroup = group.append('g')
+      .attr('class', 'node-icon-shape')
+      .attr('transform', `translate(${cx},${cy})`);
 
-    const nodeGroup = container.append('g')
-      .attr('class', 'nodes');
+    const strokeStyle = {
+      fill: 'none',
+      stroke: '#ffffff',
+      'stroke-width': 1.3,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round'
+    };
 
-    const node = nodeGroup.selectAll('g.node')
-      .data(nodes)
-      .join('g')
-      .attr('class', 'node')
-      .attr('data-id', d => d.id);
+    // Special case: Working Group uses multiple elements (people icon)
+    if (iconDef.type === 'people') {
+      // Left head
+      iconGroup.append('circle')
+        .attr('cx', -2.2).attr('cy', -2)
+        .attr('r', 1.6)
+        .attr('fill', 'none')
+        .attr('stroke', '#ffffff')
+        .attr('stroke-width', 1.3);
+      // Right head
+      iconGroup.append('circle')
+        .attr('cx', 2.2).attr('cy', -2)
+        .attr('r', 1.6)
+        .attr('fill', 'none')
+        .attr('stroke', '#ffffff')
+        .attr('stroke-width', 1.3);
+      // Body curve
+      iconGroup.append('path')
+        .attr('d', 'M-4.5,4 C-3.5,1 -1.5,0.5 0,0.5 C1.5,0.5 3.5,1 4.5,4')
+        .attr('fill', 'none')
+        .attr('stroke', '#ffffff')
+        .attr('stroke-width', 1.3)
+        .attr('stroke-linecap', 'round');
+      return;
+    }
 
-    // Card background (white with shadow)
-    node.append('rect')
-      .attr('class', 'node-card')
-      .attr('x', d => {
-        const dim = this.graphBuilder.getNodeDimensions(d.degree);
-        return -dim.width / 2;
-      })
-      .attr('y', d => {
-        const dim = this.graphBuilder.getNodeDimensions(d.degree);
-        return -dim.height / 2;
-      })
-      .attr('width', d => this.graphBuilder.getNodeDimensions(d.degree).width)
-      .attr('height', d => this.graphBuilder.getNodeDimensions(d.degree).height)
-      .attr('rx', CONFIG.nodes.cornerRadius)
-      .attr('ry', CONFIG.nodes.cornerRadius)
-      .attr('fill', CONFIG.nodes.bgColor)
-      .attr('stroke', CONFIG.nodes.strokeColor)
-      .attr('stroke-width', CONFIG.nodes.strokeWidth)
-      .style('filter', 'url(#card-shadow)');
+    // Standard path-based icon
+    const path = iconGroup.append('path')
+      .attr('d', iconDef.d);
 
-    // Colored left accent bar
-    node.append('rect')
-      .attr('class', 'node-accent')
-      .attr('x', d => {
-        const dim = this.graphBuilder.getNodeDimensions(d.degree);
-        return -dim.width / 2;
-      })
-      .attr('y', d => {
-        const dim = this.graphBuilder.getNodeDimensions(d.degree);
-        return -dim.height / 2 + 6;
-      })
-      .attr('width', CONFIG.nodes.accentWidth)
-      .attr('height', d => {
-        const dim = this.graphBuilder.getNodeDimensions(d.degree);
-        return dim.height - 12;
-      })
-      .attr('rx', 2)
-      .attr('ry', 2)
-      .attr('fill', d => this.getNodeColor(d));
-
-    // Title text (dark, bold)
-    node.append('text')
-      .attr('class', 'node-title')
-      .attr('text-anchor', 'middle')
-      .attr('x', CONFIG.nodes.accentWidth / 2)
-      .attr('dy', '-0.15em')
-      .text(d => this.truncateText(d.shortTitle, d.degree))
-      .style('font-size', CONFIG.nodes.titleFontSize + 'px')
-      .style('font-weight', '600')
-      .style('fill', CONFIG.nodes.titleColor)
-      .style('pointer-events', 'none')
-      .style('user-select', 'none');
-
-    // Type text (gray, smaller, shown on zoom)
-    node.append('text')
-      .attr('class', 'node-type')
-      .attr('text-anchor', 'middle')
-      .attr('x', CONFIG.nodes.accentWidth / 2)
-      .attr('dy', '1.15em')
-      .text(d => d.type)
-      .style('font-size', CONFIG.nodes.typeFontSize + 'px')
-      .style('fill', CONFIG.nodes.typeColor)
-      .style('pointer-events', 'none')
-      .style('user-select', 'none')
-      .style('opacity', 0); // Hidden by default, shown on zoom
-
-    return node;
+    // Apply stroke styles
+    Object.entries(strokeStyle).forEach(([key, val]) => {
+      path.attr(key, val);
+    });
   }
 
   /**
-   * Add a single new node to the existing node group (avoids re-rendering all nodes)
+   * Append card elements to a node group (shared by renderNodes and addSingleNode)
    */
-  addSingleNode(container, newNode) {
-    const nodeGroup = container.select('g.nodes');
-    const dim = this.graphBuilder.getNodeDimensions(newNode.degree);
+  _appendCardElements(group, d) {
+    const dim = this.graphBuilder.getNodeDimensions(d.degree);
+    const halfW = dim.width / 2;
+    const halfH = dim.height / 2;
 
-    const node = nodeGroup.append('g')
-      .datum(newNode)
-      .attr('class', 'node')
-      .attr('data-id', newNode.id);
-
-    // Card background
-    node.append('rect')
+    // Card background (white with shadow)
+    group.append('rect')
       .attr('class', 'node-card')
-      .attr('x', -dim.width / 2)
-      .attr('y', -dim.height / 2)
+      .attr('x', -halfW)
+      .attr('y', -halfH)
       .attr('width', dim.width)
       .attr('height', dim.height)
       .attr('rx', CONFIG.nodes.cornerRadius)
@@ -171,52 +136,180 @@ class NodeRenderer {
       .attr('stroke-width', CONFIG.nodes.strokeWidth)
       .style('filter', 'url(#card-shadow)');
 
-    // Colored accent bar
-    node.append('rect')
-      .attr('class', 'node-accent')
-      .attr('x', -dim.width / 2)
-      .attr('y', -dim.height / 2 + 6)
-      .attr('width', CONFIG.nodes.accentWidth)
-      .attr('height', dim.height - 12)
-      .attr('rx', 2)
-      .attr('ry', 2)
-      .attr('fill', this.getNodeColor(newNode));
+    // Colored circle icon (top-left)
+    const iconX = -halfW + CONFIG.nodes.iconOffsetX;
+    const iconY = -halfH + CONFIG.nodes.iconOffsetY;
 
-    // Title text
-    node.append('text')
+    group.append('circle')
+      .attr('class', 'node-icon-bg')
+      .attr('cx', iconX)
+      .attr('cy', iconY)
+      .attr('r', CONFIG.nodes.iconRadius)
+      .attr('fill', this.getNodeColor(d))
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 2);
+
+    // Draw SVG icon inside circle
+    this._drawIcon(group, d.type, iconX, iconY);
+
+    // Title text (to the right of icon)
+    const titleX = iconX + CONFIG.nodes.iconRadius + 6;
+    const titleMaxWidth = dim.width - (CONFIG.nodes.iconOffsetX + CONFIG.nodes.iconRadius + 6) - CONFIG.nodes.padding;
+
+    group.append('text')
       .attr('class', 'node-title')
-      .attr('text-anchor', 'middle')
-      .attr('x', CONFIG.nodes.accentWidth / 2)
-      .attr('dy', '-0.15em')
-      .text(this.truncateText(newNode.shortTitle, newNode.degree))
+      .attr('text-anchor', 'start')
+      .attr('x', titleX)
+      .attr('y', iconY + 1)
+      .attr('dominant-baseline', 'central')
+      .text(this.truncateText(d.shortTitle, titleMaxWidth))
       .style('font-size', CONFIG.nodes.titleFontSize + 'px')
       .style('font-weight', '600')
       .style('fill', CONFIG.nodes.titleColor)
       .style('pointer-events', 'none')
       .style('user-select', 'none');
 
-    // Type text
-    node.append('text')
-      .attr('class', 'node-type')
-      .attr('text-anchor', 'middle')
-      .attr('x', CONFIG.nodes.accentWidth / 2)
-      .attr('dy', '1.15em')
-      .text(newNode.type)
-      .style('font-size', CONFIG.nodes.typeFontSize + 'px')
-      .style('fill', CONFIG.nodes.typeColor)
-      .style('pointer-events', 'none')
-      .style('user-select', 'none')
-      .style('opacity', 0);
+    // Description text (below title/icon area, multiline)
+    const descText = d.description || '';
+    if (descText) {
+      const descX = -halfW + CONFIG.nodes.padding;
+      const descStartY = -halfH + CONFIG.nodes.iconOffsetY + CONFIG.nodes.iconRadius + 8;
+      const descMaxWidth = dim.width - CONFIG.nodes.padding * 2;
+      const lines = this.wrapText(descText, descMaxWidth, CONFIG.nodes.descFontSize);
+      const maxLines = CONFIG.nodes.descMaxLines;
+
+      lines.slice(0, maxLines).forEach((line, i) => {
+        let text = line;
+        if (i === maxLines - 1 && lines.length > maxLines) {
+          text = text.substring(0, text.length - 1) + '\u2026';
+        }
+        group.append('text')
+          .attr('class', 'node-desc')
+          .attr('text-anchor', 'start')
+          .attr('x', descX)
+          .attr('y', descStartY + i * CONFIG.nodes.descLineHeight)
+          .text(text)
+          .style('font-size', CONFIG.nodes.descFontSize + 'px')
+          .style('fill', CONFIG.nodes.descColor)
+          .style('pointer-events', 'none')
+          .style('user-select', 'none');
+      });
+    }
+
+    // Author badge (bottom-left, pill-shaped background)
+    const authorText = d.authorShort || d.author || '';
+    if (authorText) {
+      const truncatedAuthor = this.truncateAuthor(authorText, dim.width);
+      const badgeH = CONFIG.nodes.authorFontSize + CONFIG.nodes.authorPaddingY * 2;
+      const badgeW = truncatedAuthor.length * 5.2 + CONFIG.nodes.authorPaddingX * 2;
+      const badgeX = -halfW + CONFIG.nodes.padding;
+      const badgeY = halfH - badgeH - 4;
+
+      // Badge background rect
+      group.append('rect')
+        .attr('class', 'node-author-bg')
+        .attr('x', badgeX)
+        .attr('y', badgeY)
+        .attr('width', badgeW)
+        .attr('height', badgeH)
+        .attr('rx', CONFIG.nodes.authorBorderRadius)
+        .attr('ry', CONFIG.nodes.authorBorderRadius)
+        .attr('fill', CONFIG.nodes.authorBgColor)
+        .style('opacity', 0); // Hidden by default
+
+      // Author text — centered in badge
+      group.append('text')
+        .attr('class', 'node-author')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('x', badgeX + badgeW / 2)
+        .attr('y', badgeY + badgeH / 2)
+        .text(truncatedAuthor)
+        .style('font-size', CONFIG.nodes.authorFontSize + 'px')
+        .style('fill', CONFIG.nodes.authorColor)
+        .style('pointer-events', 'none')
+        .style('user-select', 'none')
+        .style('opacity', 0); // Hidden by default, shown on zoom
+    }
+  }
+
+  /**
+   * Render nodes as card-style rounded rectangles
+   */
+  renderNodes(container, nodes) {
+    // Add shadow filter
+    this.addShadowFilter(container);
+
+    const nodeGroup = container.append('g')
+      .attr('class', 'nodes');
+
+    const self = this;
+    const node = nodeGroup.selectAll('g.node')
+      .data(nodes)
+      .join('g')
+      .attr('class', 'node')
+      .attr('data-id', d => d.id)
+      .each(function(d) {
+        self._appendCardElements(d3.select(this), d);
+      });
 
     return node;
   }
 
   /**
-   * Truncate text to fit within node width
+   * Add a single new node to the existing node group (avoids re-rendering all nodes)
    */
-  truncateText(text, degree) {
-    const dim = this.graphBuilder.getNodeDimensions(degree);
-    const maxChars = Math.floor((dim.width - CONFIG.nodes.padding * 2 - CONFIG.nodes.accentWidth) / 6.5);
+  addSingleNode(container, newNode) {
+    const nodeGroup = container.select('g.nodes');
+
+    const node = nodeGroup.append('g')
+      .datum(newNode)
+      .attr('class', 'node')
+      .attr('data-id', newNode.id);
+
+    this._appendCardElements(node, newNode);
+
+    return node;
+  }
+
+  /**
+   * Truncate text to fit within available pixel width
+   */
+  truncateText(text, availableWidth) {
+    const maxChars = Math.floor(availableWidth / 5.8);
+    if (text.length <= maxChars) return text;
+    return text.substring(0, maxChars - 1) + '\u2026';
+  }
+
+  /**
+   * Wrap text into lines that fit within a pixel width
+   */
+  wrapText(text, maxWidth, fontSize) {
+    const charWidth = fontSize * 0.58;
+    const maxChars = Math.floor(maxWidth / charWidth);
+    const words = text.split(/\s+/);
+    const lines = [];
+    let currentLine = '';
+
+    words.forEach(word => {
+      const testLine = currentLine ? currentLine + ' ' + word : word;
+      if (testLine.length > maxChars && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  }
+
+  /**
+   * Truncate author text to fit within node width
+   */
+  truncateAuthor(text, nodeWidth) {
+    const availableWidth = nodeWidth - CONFIG.nodes.padding * 2 - CONFIG.nodes.authorPaddingX * 2;
+    const maxChars = Math.floor(availableWidth / 5);
     if (text.length <= maxChars) return text;
     return text.substring(0, maxChars - 1) + '\u2026';
   }
@@ -229,13 +322,14 @@ class NodeRenderer {
   }
 
   /**
-   * Update node colors (when color scheme changes) — only accent bar changes
+   * Update node colors (when color scheme changes) — icon circle color changes
    */
   updateColors(nodeSelection) {
-    nodeSelection.select('.node-accent')
+    const self = this;
+    nodeSelection.select('.node-icon-bg')
       .transition()
       .duration(CONFIG.animation.duration)
-      .attr('fill', d => this.getNodeColor(d));
+      .attr('fill', d => self.getNodeColor(d));
   }
 
   /**
@@ -288,22 +382,27 @@ class NodeRenderer {
    * Update label visibility based on zoom level
    */
   updateLabelVisibility(nodeSelection, zoomLevel) {
-    const shouldShowType = zoomLevel > CONFIG.nodes.labelThreshold;
+    const shouldShow = zoomLevel > CONFIG.nodes.labelThreshold;
 
-    // Type sub-label visibility controlled by zoom
-    nodeSelection.select('.node-type')
+    // Author text + badge visibility controlled by zoom
+    nodeSelection.select('.node-author')
       .transition()
       .duration(CONFIG.animation.fadeDuration)
       .style('opacity', d => {
-        // Always hide if faded
         const node = d3.select(`[data-id="${d.id}"]`);
         if (parseFloat(node.style('opacity')) < 0.5) return 0;
-
-        // Show for important nodes (high degree) even at low zoom
         if (d.degree > 5) return 1;
+        return shouldShow ? 1 : 0;
+      });
 
-        // Otherwise, show based on zoom level
-        return shouldShowType ? 1 : 0;
+    nodeSelection.select('.node-author-bg')
+      .transition()
+      .duration(CONFIG.animation.fadeDuration)
+      .style('opacity', d => {
+        const node = d3.select(`[data-id="${d.id}"]`);
+        if (parseFloat(node.style('opacity')) < 0.5) return 0;
+        if (d.degree > 5) return 1;
+        return shouldShow ? 1 : 0;
       });
   }
 }

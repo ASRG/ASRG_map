@@ -175,15 +175,45 @@ class ForceGraph {
   }
 
   /**
-   * Reset view to center
+   * Reset view to fit all nodes
    */
   resetView() {
-    this.svg.transition()
-      .duration(750)
-      .call(this.zoom.transform, d3.zoomIdentity);
-
     // Restart simulation
     this.simulation.alpha(0.5).restart();
+
+    // Fit to bounds after simulation settles
+    setTimeout(() => this.fitToBounds(), 1500);
+  }
+
+  /**
+   * Fit the view to show all nodes
+   */
+  fitToBounds() {
+    const bounds = this.graphContainer.node().getBBox();
+    const containerRect = this.container.node().getBoundingClientRect();
+
+    const fullWidth = containerRect.width;
+    const fullHeight = containerRect.height;
+    const width = bounds.width;
+    const height = bounds.height;
+
+    if (width === 0 || height === 0) return;
+
+    const midX = bounds.x + width / 2;
+    const midY = bounds.y + height / 2;
+
+    const scale = 0.85 / Math.max(width / fullWidth, height / fullHeight);
+    const translate = [
+      fullWidth / 2 - scale * midX,
+      fullHeight / 2 - scale * midY
+    ];
+
+    this.svg.transition()
+      .duration(750)
+      .call(
+        this.zoom.transform,
+        d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+      );
   }
 
   /**
